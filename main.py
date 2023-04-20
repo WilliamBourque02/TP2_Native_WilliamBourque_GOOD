@@ -14,7 +14,7 @@ import sys
 from functools import partial
 from tkinter import messagebox as msg
 
-
+#vbvb
 # Mise en relation du chemin d'accès pour le dossier de travail 
 path = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD"
 db = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD/quotes.db"
