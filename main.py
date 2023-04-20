@@ -16,7 +16,8 @@ from tkinter import messagebox as msg
 
 #vbvb
 # Mise en relation du chemin d'accès pour le dossier de travail 
-path = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD"
+#path = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD"
+db = os.getcwd()
 db = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD/quotes.db"
 Index = 0
 
@@ -40,6 +41,8 @@ def SQLRequest(Request):
 # Fonction pour permettre l'utilisation des requetes SQL qui utilisent le SQL VIEW ainsi que l'utilisation de
 # try / except pour trouver les potentielles erreurs plus facilement
 def SQLRequestView(Request):
+    db = os.getcwd()
+    db = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD/quotes.db"
     connection=sqlite3.connect(db, timeout=10)
     cursor=connection.cursor()
 
@@ -58,7 +61,6 @@ def SQLRequestView(Request):
     result=cursor.fetchall()
     connection.close()
     return result
-
 
 # Fonction d'exportation exportFile() permettant de faire l'exportation du fichier de la base de données actuelle
 def exportFile():
@@ -112,16 +114,16 @@ title='Enregistrer sous:', initialdir='./', filetypes=type)
     Refresh()
 
 
-    #refresh correctement les citations lors des changement a l'écran
+# Refresh les citations lors des changement a l'écran ou des manipulations quelquonques où cela est nécessaire 
 def Refresh():
     auteur,desc,citation_fr,citation_en,source,keywords,auteurid = ReadDB(Index)
 
     ID=GetID(auteurid,citation_fr,citation_en)
 
-    #si la citation est vide elle est traduit
+    # Regarde si la citation est vide
     citation=CheckifQuoteEmpty(ID)
 
-    #changement de langue de la citation
+    # Changement de la langue de la citation
     citation=""
     if varLanguage.get() == "fr":
         citation=citation_fr
@@ -161,7 +163,7 @@ def CheckifQuoteEmpty(id):
         
 
 
-#vérifie si la photo est la bonne.
+# Fonction permettant de vérifier si la photo est la bonne, sinon il retourne une photo anonymous
 def CheckPhoto(auteur):
     global photo
     chemin="./photos/"
@@ -182,21 +184,23 @@ def CheckPhoto(auteur):
     photo = ImageTk.PhotoImage(photo)
     labelPhoto.config(image=photo)
     
-#Go to next quote
+# Fonction permettant de passer à la citation suivante
 def Next():
     global Index
     Index+=1
     if Index >= len(table):
         Index= len(table)-1
     Refresh()
-#return to last quote
+
+# Fonction permettant de retourner la citation précédente
 def Previous():
     global Index
     Index-=1
     if Index >= len(table):
         Index= len(table)-1
     Refresh()
-# return a random quote
+
+# Fonction permettant de retourner une citation au hasard
 def randomQuote():
     global Index
     Index = random.randint(0, len(table))
@@ -205,13 +209,14 @@ def randomQuote():
     Refresh()
 
 
-    
-#Read from DB into list :table and return the information for the current quote
+# Lit le contenu de la base de données dans une liste(table) et retourne l'information dans la présente citation dans une fonction ReadDB
 def ReadDB(Index):
-
     global table
+    db = os.getcwd()
+    db = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD/quotes.db"
     table = Fetch(varFilter.get())
 
+    # Si la table est vide, le programme va chercher le filtre
     if table==None:
         table = Fetch(varFilter.get())
         
@@ -223,17 +228,20 @@ def ReadDB(Index):
     keywords=Fields[4]
     auteur=Fields[6]
     desc=Fields[7]
- 
+ # Si la citation_fr est vide, le programme s'assure que c'est bel et bien le cas
     if citation_fr==None:
         citation_fr=""
+# Si la citation_en est vide, le programme s'assure que c'est bel et bien le cas
     if citation_en==None:
         citation_en=""
   
     return auteur, desc, citation_fr, citation_en, source, keywords, auteurID
 
 
+# Attribution de la valeur Filter dans la fonction SetFilter() pour filtrer dans la base de données
 def SetFilter(Filter):
     global table, Index
+    # Fetch le contenu de la base de données pour le filtre suivant
     table = Fetch(Filter)
     if len(table)==0:
         messagebox.showwarning("Set Filter, 'Aucune citation ne correspond à : '"+Filter)
@@ -243,6 +251,7 @@ def SetFilter(Filter):
     varFilter.set(Filter)
     Refresh()
 
+# Attribution de la valeur Filter dans la fonction SetFilterAuthor() pour filtrer dans la base de données à partir de l'auteur
 def SetFilterAuthor():
     global table
     Filter=varAuthor.get()
@@ -250,13 +259,13 @@ def SetFilterAuthor():
     SetFilter(Filter)
 
 
-#Fetch content of the DB according to the current filter
+# Fetch le contenu de la base de données pour le filtre suivant
 def Fetch(Filter=""):
     #SelectedFields=[]
-    if Filter=="": #valeur par défaut, donc pas de sélection
+    if Filter=="": # si valeur par défaut, pas de sélection
          Resultat=SQLRequestView('SELECT * FROM view')
     else:
-        #construct the request and check for the filter values in Keywords Author, Desc, Source
+        # Construction de la requête du filtre permettant de rechercher par tous les champs de la base de données
         ListofValues=Filter.replace(',','')
         Values=ListofValues.split(' ')
         SearchString=";".join(Values)
@@ -273,7 +282,7 @@ def Fetch(Filter=""):
 
 
 
-    # Fonction retournant le ID de la citation à l'intérieur de la base de données
+# Fonction retournant le ID de la citation à l'intérieur de la base de données
 def GetID(auteurid,citation_fr,citation_en):
     
     if len(citation_fr) >0:
@@ -286,14 +295,15 @@ def GetID(auteurid,citation_fr,citation_en):
         return result[0][0]
     
 
-    #Cette Fonction contrôle l'ajout des nouvelles citations dans la base de données
+# Variable global pour déterminer le début de la seconde fenêtre (ajouter)   
 global second
+db = os.getcwd()
 db = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD/quotes.db"
+# Cette Fonction contrôle la fenêtre pour ajouter des citations dans la base de données
 def addNewQuoteWindow():
     connection=sqlite3.connect(db, timeout=10)
-    #cursor=connection.cursor()
-    
-   # Creating a second Level
+
+   # Creating a second Level (avec positionnement et valeurs des nouveaux frames)
     second = Toplevel()
     second.title("Ajouter citations")
     second.geometry("1000x700")
@@ -309,6 +319,7 @@ def addNewQuoteWindow():
     buttonRetour = Button(FrameInput,text="Quitter", command=second.destroy)
     buttonRetour.grid(row=5,column=0,pady=550,padx=600,sticky="se")
     
+    # Cette Fonction contrôle l'ajout des nouvelles citations dans la base de données
     def insertData():
         AuteurID = " "
         Auteur = entryInputAuthor.get()
@@ -337,22 +348,18 @@ def addNewQuoteWindow():
         Refresh()
         
         
-    
+    # Tous les différents labels, bouton et entry de l'écran modifier   
+    # Positionnement ainsi que les valeurs des label, entry et du bouton save pour l'écran ajouter 
     buttonSave = Button(FrameInput,text="Save", command=insertData)
     buttonSave.grid(row=5,column=0,pady=550,padx=700,sticky="se")
-   
-
     
     labelLogoAdd = Label(FrameTopSecond,text="Ajouter une citation", font=("Verdana", 36), anchor="center", background="blue", foreground="white")
     labelLogoAdd.place(x=180,y=30)
-
 
     labelInputAuthor = Label(FrameInput, text="Auteur Nom :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputAuthor.place(x=180, y=30)
     labelInputDesc = Label(FrameInput, text="Description :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputDesc.place(x = 180, y=90)
-
-
     labelInputCit_fr = Label(FrameInput, text="Citation_fr :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputCit_fr.place(x = 180, y=150)
     labelInputCit_en = Label(FrameInput, text="Citation_en :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
@@ -364,6 +371,7 @@ def addNewQuoteWindow():
 
     entryInputAuthor = Entry(FrameInput, font=('verdana',12), width=60)
     entryInputAuthor.place(x=330, y=30)
+
     entryInputDesc = Entry(FrameInput, font=('verdana',12), width=60)
     entryInputDesc.place(x=330, y=90)
 
@@ -380,30 +388,16 @@ def addNewQuoteWindow():
     entryInputKeyword.place(x=330, y=330)
 
 
-def search(self, *args, **kwargs):
-         
-         result = SQLRequest("SELECT * FROM Citations WHERE AuteurID=?")
-         #result = c.execute(sql, (self.GetID(Au)  get(),))
-         for r in result:
-              self.n1 = r[1]  # name
-              self.n2 = r[2]  # stock
-              self.n3 = r[3]  # cp
-              self.n4 = r[4]  # sp
-              self.n5 = r[5]  # total cp
-              self.n6 = r[6]  # total sp
-              self.n7 = r[7]  # assumed_profit
-              self.n8 = r[8]  # vendor
-              self.n9 = r[9]  # vendor_phone
-         
 
-    
+# Variable global pour déterminer le début de la troisième fenêtre (modifier)   
 global third
+db = os.getcwd()
 db = "C:/Users/willb/Documents/GitHub/TP2_Native_WilliamBourque_GOOD/quotes.db"
-#Cette Fonction contrôle la modification des nouvelles citations dans la base de données
+# Cette Fonction contrôle la fenêtre de modification des citations dans la base de données
 def modifyQuoteWindow():
     connection=sqlite3.connect(db, timeout=10)
     
-   # Creating a third Level
+   # Creating a third Level (avec positionnement et valeurs des nouveaux frames)
     second = Toplevel()
     second.title("Modifier citations")
     second.geometry("1000x700")
@@ -419,6 +413,7 @@ def modifyQuoteWindow():
     buttonRetour = Button(FrameInput,text="Quitter", command=second.destroy)
     buttonRetour.grid(row=5,column=0,pady=550,padx=600,sticky="se")
     
+    # Cette Fonction contrôle le fait de modifier une des citations dans la base de données
     def updateData():
         
         entryInputCit_fr.configure(textvariable=varUpdateCit_fr)
@@ -429,13 +424,6 @@ def modifyQuoteWindow():
         Auteur, Desc, Citation_fr, Citation_en, Source, Mots_clés, AuteurID, = ReadDB(Index)
 
         ID = GetID(AuteurID, Citation_fr, Citation_en)
-
-        #varUpdateCit_fr.set(Citation_fr)
-        #varUpdateCit_en.set(Citation_en)
-       # varUpdateKeywords.set(Keywords)
-        #varUpdateSource.set(Source)
-
-     
 
         Citation_fr = varUpdateCit_fr.get()
         Citation_en = varUpdateCit_en.get()
@@ -448,36 +436,17 @@ def modifyQuoteWindow():
         Next()
     
     
-    
-        
-        
-
-        
-
-        #SQLRequest(f"INSERT INTO `Auteurs`(`Auteur`, `Desc`) VALUES ('{Auteur}','{Desc}')")
-
-        #auteurID = SQLRequest(f"SELECT AuteurID FROM Auteurs WHERE 'Auteur' = '{Auteur}'")
-        
-        #SQLRequest(f"INSERT INTO `Citations`(`AuteurID`, `Citation_fr`, `Citation_en`, `Source`, `Mots_clés`) VALUES ('{auteurID[0][0]}','{Citation_fr}','{Citation_en}','{Source}','{Mots_clés}')")
- 
-
-        
-
-    
+    # Tous les différents labels de l'écran modifier   
+    # Positionnement ainsi que les valeurs des label et du bouton save pour l'écran modifier 
     buttonSave = Button(FrameInput,text="Save", command=updateData)
     buttonSave.grid(row=5,column=0,pady=550,padx=700,sticky="se")
-
     
     labelLogoModify = Label(FrameTopSecond,text="Modifier une citation", font=("Verdana", 36), anchor="center", background="blue", foreground="white")
     labelLogoModify.place(x=180,y=30)
-
-
     labelInputAuthor = Label(FrameInput, text="Auteur Nom :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputAuthor.place(x=180, y=30)
     labelInputDesc = Label(FrameInput, text="Description :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputDesc.place(x = 180, y=90)
-
-
     labelInputCit_fr = Label(FrameInput, text="Citation_fr :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputCit_fr.place(x = 180, y=150)
     labelInputCit_en = Label(FrameInput, text="Citation_en :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
@@ -487,28 +456,15 @@ def modifyQuoteWindow():
     labelInputKeyword = Label(FrameInput, text="Keywords :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputKeyword.place(x = 180, y=330)
 
-
-    #entryInputCit_fr.configure(textvariable=varUpdateCit_fr)
-    #entryInputCit_en.configure(textvariable=varUpdateCit_en)
-    #entryInputKeyword.configure(textvariable=varUpdateKeywords)
-    #entryInputSource.configure(textvariable=varUpdateSource)
-
+    # Assignation des valeurs de la base de données dans des variables pour les entrybox afin que le texte y soit automatiquement inscrit
     Auteur, Desc, Citation_fr, Citation_en, Source, Keywords, AuteurID, = ReadDB(Index)
-
     ID = GetID(AuteurID, Citation_fr, Citation_en)
-
     varUpdateCit_fr.set(Citation_fr)
     varUpdateCit_en.set(Citation_en)
     varUpdateKeywords.set(Keywords)
     varUpdateSource.set(Source)
-
-    #Citation_fr = varUpdateCit_fr.get()
-    #Citation_en = varUpdateCit_en.get()
-    #Source = varUpdateSource.get()
-    #Mots_clés = varUpdateKeywords.get()
-
     
-
+    # Positionnement ainsi que les valeurs des entrybox pour l'écran modifier 
     entryInputAuthor = Entry(FrameInput, font=('verdana',12), width=60)
     entryInputAuthor.place(x=330, y=30)
     entryInputDesc = Entry(FrameInput, font=('verdana',12), width=60)
@@ -521,19 +477,17 @@ def modifyQuoteWindow():
     entryInputCit_en.place(x=330, y=210)
 
     entryInputSource = Entry(FrameInput, font=('verdana',12), width=60, textvariable=varUpdateSource)
-    #entryInputSource.insert(0, f"{Source}")
     entryInputSource.place(x=330, y=270)
 
     entryInputKeyword = Entry(FrameInput, font=('verdana',12), width=60, textvariable=varUpdateKeywords)
     entryInputKeyword.place(x=330, y=330)
 
 
-#Define a function to clear the Entry Widget Content
-
-   
+# Define a function to clear the Entry Widget Content
 
 
-#Cette Fonction contrôle le fait de delete une des citations dans la base de données
+
+# Cette Fonction contrôle le fait de delete une des citations dans la base de données
 def deleteQuote():
 
     Auteur, Desc, Citation_fr, Citation_en, Source, Keywords, AuteurID, = ReadDB(Index)
@@ -542,23 +496,20 @@ def deleteQuote():
 
     WarningBoxDelete = messagebox.askquestion(title="warning", message="Delete ?")
 
+    # Si on répond oui à la warning box
     if WarningBoxDelete == "yes":
         SQLRequest(f"DELETE FROM Citations WHERE rowid = '{ID}'")
         keywordTextInput.delete(0, END)
         Next()
         Refresh() # refresh the window with new records
-        #Next()
 
+# sinon on continu
     else:
         pass
 
-    
-    
-    
-
-    # Affichage par la fonction showUI() des différents widgets et leurs dispositions sur l'écran principal (Boutons, Étiquettes, etc...)
+# Affichage par la fonction showUI() des différents widgets et leurs dispositions sur l'écran principal (Boutons, Étiquettes, etc...)
 def showUI():
-    
+
     # Radiobuttons de langues
     buttonFr.grid(row=0,column=0,sticky="w",pady=5,padx=5)
     buttonEn.place(x=75,y=5)
@@ -576,7 +527,7 @@ def showUI():
     buttonAdd.grid(row=2,column=0,pady=10,padx=3,sticky="w")
     buttonModify.grid(row=2,column=0,pady=10,padx=38,sticky="w")
     buttonDelete.grid(row=2,column=0,pady=10,padx=90,sticky="w")
-            #buttonImport.grid(row=2,column=0,pady=10,padx=130,sticky="w")
+    #buttonImport.grid(row=2,column=0,pady=10,padx=130,sticky="w")
     buttonExport.grid(row=2,column=0,pady=10,padx=135,sticky="w")
 
     # Tous les différents labels de l'écran principal    
@@ -590,9 +541,6 @@ def showUI():
     labelKeywordQuote.place(x=305,y=380)
     labelLogo.place(x=500,y=5)
 
-
-
-
 # Affichage de l'écran principal et les options qui entourent cet affichage
 root=Tk()
 root.title("Citations")
@@ -602,7 +550,8 @@ root.geometry("1000x700")
 root.resizable(width=False,height=False)
 root.configure(background='black')
 
-# Définition de toutes les variables pour une citation dans la base de donnée
+# Définition de toutes les variables pour une citation dans la base de données
+# Variables principales
 varAuthor = StringVar()
 varQuote = StringVar()
 varSource = StringVar()
@@ -612,12 +561,13 @@ varLanguage = StringVar()
 varLanguage.set("fr")
 varFilter = StringVar()
 
+# Nouvelles Variables pour la fonction update
 varUpdateCit_fr = StringVar()
 varUpdateCit_en = StringVar()
 varUpdateKeywords = StringVar()
 varUpdateSource = StringVar()
 
-# Déinition des différents affichage(frames) dans l'écran principal
+# Définition des différents frames présents dans l'écran principal
 FrameTop = Frame(root,borderwidth=1,width=1000,background="blue",height=120)
 FrameQuote = Frame(root,borderwidth=1,height=600,background="black",width=1000)
 FrameButton = Frame(root,borderwidth=1,height=25,width=1000, background="black")
@@ -628,18 +578,14 @@ FrameQuote.grid_propagate(0)
 FrameButton.grid(row=1,column=0,sticky="s")
 FrameButton.grid_propagate(0)
 
-
 # Radio Button pour sélectionner la langue de la citation
 buttonFr = Radiobutton(FrameTop, text="Français",value="fr",variable=varLanguage,command=partial(Refresh))
 buttonEn = Radiobutton(FrameTop,text="English", value="en",variable=varLanguage,command=partial(Refresh))
 
-
-# Entry pour que l'utilisateur y écrit ses mots clées
+# Entry pour que l'utilisateur y inscrit ses mots clées
 keywordTextInput = Entry(FrameTop,textvariable=varFilter, x = 100)
 
-
-
-# Définitions des Différents boutons de l'écran principal et comment ils seront disposés
+# Définitions des Différents boutons de l'écran principal ainsi que leurs associations à leurs fonctions respectives
 buttonNext = Button(FrameButton,text="Next",padx=50,command=partial(Next))
 buttonPrevious = Button(FrameButton,text="Previous",padx=50,command=partial(Previous))
 buttonGenerate = Button(FrameButton,text="Generate",padx=50,command=partial(randomQuote))
@@ -650,30 +596,16 @@ buttonDelete = Button(FrameTop,text="Delete", command=partial(deleteQuote))
 buttonExport = Button(FrameTop, text="Export",command=partial(exportFile))
 buttonKeyword = Button(FrameTop,text="Filtrer", padx= -100,command=partial(Refresh))
 
-
-#Définition des label de l'écran principal où la plupart des options y sont situées
-
+#Définition des labels de l'écran principal où la plupart des options cocernant leurs affichages y sont situées
 labelID = Label(FrameButton,text="")
-
 labelKeyword = Label(FrameTop,text="Mot(s) :")
-
 labelKeywordQuote = Label(FrameQuote,text="Mot Clé de la citation",textvariable=varKeyword,wraplength=500,height=3,width=60)
-
 labelQuote = Label(FrameQuote,textvariable=varQuote,height=20,width=80,wraplength=650)
-
 labelSource = Label(FrameQuote,text="source",textvariable=varSource,wraplength=650,height=3,width=80)
-
 labelAuthor = Label(FrameQuote,text="auteur",textvariable=varAuthor)
-
 labelDescription = Label(FrameQuote,text="Description",textvariable=varDescription,wraplength=150,height=11,width=20)
-
 labelPhoto = Label(FrameQuote,height=150,width=150)
-
 labelLogo= Label(FrameTop,image=logoQuotes)
-
-
-
-
 
 # Répétition des fonctions importantes au bon déroulement du programme 
 ReadDB(1)
