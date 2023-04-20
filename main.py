@@ -335,6 +335,8 @@ def addNewQuoteWindow():
         showUI()
         ReadDB(1)
         Refresh()
+        second.destroy()
+        #Next()
     
     buttonSave = Button(FrameInput,text="Save", command=insertData)
     buttonSave.grid(row=5,column=0,pady=550,padx=700,sticky="se")
@@ -378,7 +380,21 @@ def addNewQuoteWindow():
     entryInputKeyword.place(x=330, y=330)
 
 
-
+def search(self, *args, **kwargs):
+         
+         result = SQLRequest("SELECT * FROM Citations WHERE AuteurID=?")
+         #result = c.execute(sql, (self.GetID(Au)  get(),))
+         for r in result:
+              self.n1 = r[1]  # name
+              self.n2 = r[2]  # stock
+              self.n3 = r[3]  # cp
+              self.n4 = r[4]  # sp
+              self.n5 = r[5]  # total cp
+              self.n6 = r[6]  # total sp
+              self.n7 = r[7]  # assumed_profit
+              self.n8 = r[8]  # vendor
+              self.n9 = r[9]  # vendor_phone
+         
 
     
 global third
@@ -404,26 +420,48 @@ def modifyQuoteWindow():
     buttonRetour.grid(row=5,column=0,pady=550,padx=600,sticky="se")
     
     def updateData():
-        AuteurID = ""
-        Auteur = entryInputAuthor.get()
-        Desc = entryInputDesc.get()
-        Citation_fr = entryInputCit_fr.get()
-        Citation_en = entryInputCit_en.get()
-        Source = entryInputSource.get()
-        Mots_clés = entryInputKeyword.get()
+        
+        entryInputCit_fr.configure(textvariable=varUpdateCit_fr)
+        entryInputCit_en.configure(textvariable=varUpdateCit_en)
+        entryInputKeyword.configure(textvariable=varUpdateKeywords)
+        entryInputSource.configure(textvariable=varUpdateSource)
+
+        Auteur, Desc, Citation_fr, Citation_en, Source, Mots_clés, AuteurID, = ReadDB(Index)
+
+        ID = GetID(AuteurID, Citation_fr, Citation_en)
+
+        #varUpdateCit_fr.set(Citation_fr)
+        #varUpdateCit_en.set(Citation_en)
+       # varUpdateKeywords.set(Keywords)
+        #varUpdateSource.set(Source)
+
+     
+
+        Citation_fr = varUpdateCit_fr.get()
+        Citation_en = varUpdateCit_en.get()
+        Source = varUpdateSource.get()
+        Mots_clés = varUpdateKeywords.get()
+
+
+        SQLRequest(f'UPDATE Citations SET Citation_fr = "{Citation_fr}", Citation_en = "{Citation_en}", Source = "{Source}", Mots_clés = "{Mots_clés}" WHERE rowid ="{ID}"')
+        second.destroy()
+        Next()
+    
+    
+    
+        
+        
 
         
 
-        SQLRequest(f"INSERT INTO `Auteurs`(`Auteur`, `Desc`) VALUES ('{Auteur}','{Desc}')")
+        #SQLRequest(f"INSERT INTO `Auteurs`(`Auteur`, `Desc`) VALUES ('{Auteur}','{Desc}')")
 
-        auteurID = SQLRequest(f"SELECT AuteurID FROM Auteurs WHERE 'Auteur' = '{Auteur}'")
+        #auteurID = SQLRequest(f"SELECT AuteurID FROM Auteurs WHERE 'Auteur' = '{Auteur}'")
         
-        SQLRequest(f"INSERT INTO `Citations`(`AuteurID`, `Citation_fr`, `Citation_en`, `Source`, `Mots_clés`) VALUES ('{auteurID[0][0]}','{Citation_fr}','{Citation_en}','{Source}','{Mots_clés}')")
+        #SQLRequest(f"INSERT INTO `Citations`(`AuteurID`, `Citation_fr`, `Citation_en`, `Source`, `Mots_clés`) VALUES ('{auteurID[0][0]}','{Citation_fr}','{Citation_en}','{Source}','{Mots_clés}')")
  
 
-        showUI()
-        ReadDB(1)
-        Refresh()
+        
 
     
     buttonSave = Button(FrameInput,text="Save", command=updateData)
@@ -449,21 +487,44 @@ def modifyQuoteWindow():
     labelInputKeyword = Label(FrameInput, text="Keywords :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputKeyword.place(x = 180, y=330)
 
+
+    #entryInputCit_fr.configure(textvariable=varUpdateCit_fr)
+    #entryInputCit_en.configure(textvariable=varUpdateCit_en)
+    #entryInputKeyword.configure(textvariable=varUpdateKeywords)
+    #entryInputSource.configure(textvariable=varUpdateSource)
+
+    Auteur, Desc, Citation_fr, Citation_en, Source, Keywords, AuteurID, = ReadDB(Index)
+
+    ID = GetID(AuteurID, Citation_fr, Citation_en)
+
+    varUpdateCit_fr.set(Citation_fr)
+    varUpdateCit_en.set(Citation_en)
+    varUpdateKeywords.set(Keywords)
+    varUpdateSource.set(Source)
+
+    #Citation_fr = varUpdateCit_fr.get()
+    #Citation_en = varUpdateCit_en.get()
+    #Source = varUpdateSource.get()
+    #Mots_clés = varUpdateKeywords.get()
+
+    
+
     entryInputAuthor = Entry(FrameInput, font=('verdana',12), width=60)
     entryInputAuthor.place(x=330, y=30)
     entryInputDesc = Entry(FrameInput, font=('verdana',12), width=60)
     entryInputDesc.place(x=330, y=90)
 
-    entryInputCit_fr = Entry(FrameInput, font=('verdana',12), width=60)
+    entryInputCit_fr = Entry(FrameInput, font=('verdana',12), width=60, textvariable=varUpdateCit_fr)
     entryInputCit_fr.place(x=330, y=150)
 
-    entryInputCit_en = Entry(FrameInput, font=('verdana',12), width=60)
+    entryInputCit_en = Entry(FrameInput, font=('verdana',12), width=60, textvariable=varUpdateCit_en)
     entryInputCit_en.place(x=330, y=210)
 
-    entryInputSource = Entry(FrameInput, font=('verdana',12), width=60)
+    entryInputSource = Entry(FrameInput, font=('verdana',12), width=60, textvariable=varUpdateSource)
+    #entryInputSource.insert(0, f"{Source}")
     entryInputSource.place(x=330, y=270)
 
-    entryInputKeyword = Entry(FrameInput, font=('verdana',12), width=60)
+    entryInputKeyword = Entry(FrameInput, font=('verdana',12), width=60, textvariable=varUpdateKeywords)
     entryInputKeyword.place(x=330, y=330)
 
 
@@ -535,6 +596,11 @@ varKeyword = StringVar()
 varLanguage = StringVar()
 varLanguage.set("fr")
 varFilter = StringVar()
+
+varUpdateCit_fr = StringVar()
+varUpdateCit_en = StringVar()
+varUpdateKeywords = StringVar()
+varUpdateSource = StringVar()
 
 # Déinition des différents affichage(frames) dans l'écran principal
 FrameTop = Frame(root,borderwidth=1,width=1000,background="blue",height=120)
