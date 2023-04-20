@@ -331,12 +331,12 @@ def addNewQuoteWindow():
         args3 = (AuteurID[0][0], Citation_fr, Citation_en, Source, Mots_clés)
         print(sql3, args3)
 
-
+        second.destroy()
         showUI()
         ReadDB(1)
         Refresh()
-        second.destroy()
-        #Next()
+        
+        
     
     buttonSave = Button(FrameInput,text="Save", command=insertData)
     buttonSave.grid(row=5,column=0,pady=550,padx=700,sticky="se")
@@ -528,17 +528,32 @@ def modifyQuoteWindow():
     entryInputKeyword.place(x=330, y=330)
 
 
-#Cette Fonction contrôle le fait de delete une des citations dans la base de données
-def deleteQuote(auteurid):
-    connection=sqlite3.connect(db, timeout=10)
-    cursor=connection.cursor()
+#Define a function to clear the Entry Widget Content
 
-    my_var=msg.askyesnocancel("Delete ?","Delete id:"+str(auteurid),icon='warning',default='no')
-    if my_var: # True if yes button is clicked
-        r_set=cursor.execute("DELETE FROM Citations WHERE AuteurID =" + str(auteurid))
-        msg.showerror("Deleted ","No of records deleted = " + str(r_set.rowcount))
-        connection.commit()
+   
+
+
+#Cette Fonction contrôle le fait de delete une des citations dans la base de données
+def deleteQuote():
+
+    Auteur, Desc, Citation_fr, Citation_en, Source, Keywords, AuteurID, = ReadDB(Index)
+
+    ID = GetID(AuteurID, Citation_fr, Citation_en)
+
+    WarningBoxDelete = messagebox.askquestion(title="warning", message="Delete ?")
+
+    if WarningBoxDelete == "yes":
+        SQLRequest(f"DELETE FROM Citations WHERE rowid = '{ID}'")
+        keywordTextInput.delete(0, END)
+        Next()
         Refresh() # refresh the window with new records
+        #Next()
+
+    else:
+        pass
+
+    
+    
     
 
     # Affichage par la fonction showUI() des différents widgets et leurs dispositions sur l'écran principal (Boutons, Étiquettes, etc...)
@@ -630,7 +645,7 @@ buttonPrevious = Button(FrameButton,text="Previous",padx=50,command=partial(Prev
 buttonGenerate = Button(FrameButton,text="Generate",padx=50,command=partial(randomQuote))
 buttonAdd = Button(FrameTop,text="Add", command=partial(addNewQuoteWindow))
 buttonModify = Button(FrameTop,text="Modify",command=partial(modifyQuoteWindow))
-buttonDelete = Button(FrameTop,text="Delete", command=lambda : deleteQuote)
+buttonDelete = Button(FrameTop,text="Delete", command=partial(deleteQuote))
 #buttonImport = Button(FrameTop,text="Import")
 buttonExport = Button(FrameTop, text="Export",command=partial(exportFile))
 buttonKeyword = Button(FrameTop,text="Filtrer", padx= -100,command=partial(Refresh))
