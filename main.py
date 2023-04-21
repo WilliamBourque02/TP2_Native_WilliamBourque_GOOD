@@ -1,5 +1,7 @@
 # William Bourque 1942926
 
+import codecs
+import csv
 import pathlib
 from tkinter import *
 from tkinter import filedialog
@@ -113,6 +115,30 @@ title='Enregistrer sous:', initialdir='./', filetypes=type)
     showinfo(title='Fichier Exporté', message=tail.upper()+" "+str(len(table))+" citationsexportées")
     Refresh()
 
+# Fonction d'importation importFile() permettant de faire l'importation d'un fichier d'une base de donnée
+def importFile():
+    fileText = filedialog.askopenfile(mode='r', defaultextension=".csv",title='Ouvrir :', initialdir='./')
+    #code = ['ISO-8859-1', 'utf-8']
+    with open(fileText.name, 'w', newline='',encoding="ISO-8859-1") as fileCSV:
+        fileCSV = list(csv.reader(fileCSV, delimiter=";"))
+        print(fileCSV[0])
+        if fileCSV[0] == ["Auteur"]:
+            fileCSV.pop(0)
+            for champ in fileCSV:
+                varImportAuthor.set(champ[0])
+                varImportDescription.set(champ[1])
+                varImportCit_fr.set(champ[2])
+                varImportCit_en.set(champ[3])
+                varImportSource.set(champ[4])
+                varImportSource.set(champ[5])
+                Refresh()
+                ReadDB(1)
+
+        else:  
+            showinfo(title='erreur', message= "mauvais entête")
+            #Refresh()
+    return champ [0,1,2,3,4,5]
+
 
 # Refresh les citations lors des changement a l'écran ou des manipulations quelquonques où cela est nécessaire 
 def Refresh():
@@ -148,6 +174,7 @@ def Refresh():
 
 
     # Association de valeurs aux nouvelles variables  
+    varID.set(auteurid)
     varQuote.set(citation)
     varAuthor.set(auteur)
     varDescription.set(desc)
@@ -528,8 +555,8 @@ def showUI():
     buttonAdd.grid(row=2,column=0,pady=10,padx=3,sticky="w")
     buttonModify.grid(row=2,column=0,pady=10,padx=38,sticky="w")
     buttonDelete.grid(row=2,column=0,pady=10,padx=90,sticky="w")
-    #buttonImport.grid(row=2,column=0,pady=10,padx=130,sticky="w")
     buttonExport.grid(row=2,column=0,pady=10,padx=135,sticky="w")
+    buttonImport.grid(row=2,column=0,pady=10,padx=182,sticky="w")
 
     # Tous les différents labels de l'écran principal    
     labelKeyword.grid(row=1,column=0,sticky="w",padx=5)
@@ -553,6 +580,7 @@ root.configure(background='black')
 
 # Définition de toutes les variables pour une citation dans la base de données
 # Variables principales
+varID = StringVar()
 varAuthor = StringVar()
 varQuote = StringVar()
 varSource = StringVar()
@@ -561,6 +589,14 @@ varKeyword = StringVar()
 varLanguage = StringVar()
 varLanguage.set("fr")
 varFilter = StringVar()
+
+# Nouvelles Variables pour la fonction Import
+varImportAuthor = StringVar()
+varImportDescription = StringVar()
+varImportCit_fr = StringVar()
+varImportCit_en = StringVar()
+varImportKeywords = StringVar()
+varImportSource = StringVar()
 
 # Nouvelles Variables pour la fonction update
 varUpdateCit_fr = StringVar()
@@ -593,12 +629,12 @@ buttonGenerate = Button(FrameButton,text="Generate",padx=50,command=partial(rand
 buttonAdd = Button(FrameTop,text="Add", command=partial(addNewQuoteWindow))
 buttonModify = Button(FrameTop,text="Modify",command=partial(modifyQuoteWindow))
 buttonDelete = Button(FrameTop,text="Delete", command=partial(deleteQuote))
-#buttonImport = Button(FrameTop,text="Import")
 buttonExport = Button(FrameTop, text="Export",command=partial(exportFile))
+buttonImport = Button(FrameTop,text="Import", command=partial(importFile))
 buttonKeyword = Button(FrameTop,text="Filtrer", padx= -100,command=partial(Refresh))
 
 #Définition des labels de l'écran principal où la plupart des options cocernant leurs affichages y sont situées
-labelID = Label(FrameButton,text="")
+labelID = Label(FrameButton,text="ID de l'auteur", textvariable=varID)
 labelKeyword = Label(FrameTop,text="Mot(s) :")
 labelKeywordQuote = Label(FrameQuote,text="Mot Clé de la citation",textvariable=varKeyword,wraplength=500,height=3,width=60)
 labelQuote = Label(FrameQuote,textvariable=varQuote,height=20,width=80,wraplength=650)
