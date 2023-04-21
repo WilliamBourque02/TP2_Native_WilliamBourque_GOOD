@@ -443,9 +443,9 @@ def modifyQuoteWindow():
     
     labelLogoModify = Label(FrameTopSecond,text="Modifier une citation", font=("Verdana", 36), anchor="center", background="blue", foreground="white")
     labelLogoModify.place(x=180,y=30)
-    labelInputAuthor = Label(FrameInput, text="Auteur Nom :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
+    labelInputAuthor = Label(FrameInput, text="(Désactivé) :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputAuthor.place(x=180, y=30)
-    labelInputDesc = Label(FrameInput, text="Description :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
+    labelInputDesc = Label(FrameInput, text="(Désactivé) :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputDesc.place(x = 180, y=90)
     labelInputCit_fr = Label(FrameInput, text="Citation_fr :", font=("Verdana", 14), anchor="center", background="blue", foreground="white")
     labelInputCit_fr.place(x = 180, y=150)
@@ -459,15 +459,16 @@ def modifyQuoteWindow():
     # Assignation des valeurs de la base de données dans des variables pour les entrybox afin que le texte y soit automatiquement inscrit
     Auteur, Desc, Citation_fr, Citation_en, Source, Keywords, AuteurID, = ReadDB(Index)
     ID = GetID(AuteurID, Citation_fr, Citation_en)
+    
     varUpdateCit_fr.set(Citation_fr)
     varUpdateCit_en.set(Citation_en)
     varUpdateKeywords.set(Keywords)
     varUpdateSource.set(Source)
     
     # Positionnement ainsi que les valeurs des entrybox pour l'écran modifier 
-    entryInputAuthor = Entry(FrameInput, font=('verdana',12), width=60)
+    entryInputAuthor = Entry(FrameInput, font=('verdana',12), width=60, state=DISABLED)
     entryInputAuthor.place(x=330, y=30)
-    entryInputDesc = Entry(FrameInput, font=('verdana',12), width=60)
+    entryInputDesc = Entry(FrameInput, font=('verdana',12), width=60, state=DISABLED)
     entryInputDesc.place(x=330, y=90)
 
     entryInputCit_fr = Entry(FrameInput, font=('verdana',12), width=60, textvariable=varUpdateCit_fr)
